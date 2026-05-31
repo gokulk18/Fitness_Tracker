@@ -2,26 +2,34 @@ trigger:
 - main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'ubuntu-latest'
 
 variables:
-  imageRepository: fitness-app
-  containerRegistry: fitnessacr.azurecr.io
-  tag: $(Build.BuildId)
+  imageName: 'fitness-app'
+  tag: 'latest'
 
 stages:
-- stage: Build
+- stage: BuildAndPush
+  displayName: Build and Push Docker Image
   jobs:
-  - job: BuildAndPush
+  - job: DockerBuildPush
+    displayName: Docker Build & Push
     steps:
 
+    # 1. Login to ACR via service connection
+    - task: Docker@2
+      displayName: Login to ACR
+      inputs:
+        command: login
+        containerRegistry: 'fitness-acr'
+
+    # 2. Build and Push Image
     - task: Docker@2
       displayName: Build and Push Image
       inputs:
         command: buildAndPush
-        repository: $(imageRepository)
+        repository: $(imageName)
         dockerfile: '**/Dockerfile'
         containerRegistry: 'fitness-acr'
         tags: |
           $(tag)
-          latest
