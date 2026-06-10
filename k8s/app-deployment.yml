@@ -57,7 +57,7 @@ spec:
         effect: "NoSchedule"         
       containers:
         - name: fitness-tracker-app
-          image: image: fitnessacr.azurecr.io/fitnessapp:latest
+          image: fitnessacr.azurecr.io/fitnessapp:latest
         # image: pulkit197/fitness_tracker-master-copy3-fitness-app:latest
           ports:
             - containerPort: 5000
