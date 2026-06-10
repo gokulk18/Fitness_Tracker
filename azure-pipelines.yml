@@ -13,18 +13,15 @@ variables:
 
 steps:
 
-# Install Node.js
 - task: NodeTool@0
   displayName: 'Install Node.js'
   inputs:
     versionSpec: '20.x'
 
-# Install dependencies
 - script: |
     npm install
   displayName: 'Install Dependencies'
 
-# Build and Push Docker Image to ACR
 - task: Docker@2
   displayName: 'Build and Push Docker Image'
   inputs:
@@ -36,20 +33,16 @@ steps:
       $(imageTag)
       latest
 
-# Deploy manifests to AKS
 - task: KubernetesManifest@1
   displayName: 'Deploy to AKS'
   inputs:
     action: deploy
     kubernetesServiceConnection: 'AKS'
-    namespace: default
+    namespace: suwetha-ns
     manifests: |
       k8s/app-deployment.yml
       k8s/configmap.yml
-      k8s/fithttp.yml
-      k8s/kgateway.yml
       k8s/mongodb-deployment.yaml
-      k8s/pv.yml
       k8s/pvc.yml
     containers: |
       fitnessacr.azurecr.io/$(imageRepository):$(imageTag)
