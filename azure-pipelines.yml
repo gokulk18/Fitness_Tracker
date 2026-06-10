@@ -9,26 +9,47 @@ pool:
 
 variables:
   imageRepository: fitnessapp
-  tag: $(Build.BuildId)
+  imageTag: $(Build.BuildId)
 
 steps:
 
+# Install Node.js
 - task: NodeTool@0
+  displayName: 'Install Node.js'
   inputs:
     versionSpec: '20.x'
-  displayName: Install Node.js
 
+# Install dependencies
 - script: |
     npm install
-  displayName: Install dependencies
+  displayName: 'Install Dependencies'
 
+# Build and Push Docker Image to ACR
 - task: Docker@2
-  displayName: Build and Push Image
+  displayName: 'Build and Push Docker Image'
   inputs:
     command: buildAndPush
     repository: $(imageRepository)
     dockerfile: '**/Dockerfile'
-    containerRegistry: 'fitness-acr'
+    containerRegistry: 'ACR service connection'
     tags: |
-      $(tag)
+      $(imageTag)
       latest
+
+# Deploy manifests to AKS
+- task: KubernetesManifest@1
+  displayName: 'Deploy to AKS'
+  inputs:
+    action: deploy
+    kubernetesServiceConnection: 'AKS'
+    namespace: default
+    manifests: |
+      k8/app-deployment.yml
+      k8/configmap.yml
+      k8/fithttp.yml
+      k8/kgateway.yml
+      k8/mongodb-deployment.yaml
+      k8/pv.yml
+      k8/pvc.yml
+    containers: |
+      fitnessacr.azurecr.io/$(imageRepository):$(imageTag)
