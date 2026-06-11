@@ -37,7 +37,7 @@ steps:
   displayName: 'Deploy to AKS'
   inputs:
     action: deploy
-    kubernetesServiceConnection: 'AKS'
+    kubernetesServiceConnection: 'AzureAKS'
     namespace: suwetha-ns
     manifests: |
       k8s/app-deployment.yml
