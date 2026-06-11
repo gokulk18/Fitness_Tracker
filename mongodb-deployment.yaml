@@ -30,13 +30,13 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "200m"
-        volumeMounts:
-          - name: suwetha-mongodb
-            mountPath: /data/db
-      volumes:
-        - name: suwetha-mongodb
-          persistentVolumeClaim:
-            claimName: mongo-pvc
+      #   volumeMounts:
+      #     - name: suwetha-mongodb
+      #       mountPath: /data/db
+      # volumes:
+      #   - name: suwetha-mongodb
+      #     persistentVolumeClaim:
+      #       claimName: mongo-pvc
      
  
 ---
