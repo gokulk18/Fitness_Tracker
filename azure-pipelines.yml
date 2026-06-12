@@ -31,7 +31,7 @@ steps:
     command: buildAndPush
     repository: $(imageRepository)
     dockerfile: 'Dockerfile'
-    containerRegistry: 'ACR service connection'
+    containerRegistry: 'ACR Connection'
     tags: |
       $(imageTag)
       latest
@@ -44,24 +44,39 @@ steps:
     kubernetesServiceConnection: 'AzureAKS'
     namespace: suwetha-ns
     manifests: |
+      k8s/namespace.yml
       k8s/app-deployment.yml
       k8s/configmap.yml
       k8s/mongodb-deployment.yaml
-      k8s/pvc.yml
     containers: |
       fitnessacr.azurecr.io/$(imageRepository):$(imageTag)
 
-# Slack Notification (Runs Always)
-- script: |
-    if [ "$(Agent.JobStatus)" = "Succeeded" ]; then
-      MESSAGE="✅ Pipeline Succeeded | Project: $(System.TeamProject) | Repo: $(Build.Repository.Name) | Branch: $(Build.SourceBranchName) | Build: $(Build.BuildNumber)"
-    else
-      MESSAGE="❌ Pipeline Failed | Project: $(System.TeamProject) | Repo: $(Build.Repository.Name) | Branch: $(Build.SourceBranchName) | Build: $(Build.BuildNumber)"
-    fi
-
-    curl -X POST \
-      -H "Content-Type: application/json" \
-      --data "{\"text\":\"$MESSAGE\"}" \
-      "$(SLACK_WEBHOOK_URL)"
+# Slack Notification (Success or Failure)
+- task: Bash@3
   displayName: 'Slack Notification'
   condition: always()
+  inputs:
+    targetType: 'inline'
+    script: |
+      if [ "$(Agent.JobStatus)" = "Succeeded" ]; then
+        MESSAGE="✅ Azure DevOps Pipeline Succeeded
+        
+        Project: $(System.TeamProject)
+        Repository: $(Build.Repository.Name)
+        Branch: $(Build.SourceBranchName)
+        Build Number: $(Build.BuildNumber)"
+      else
+        MESSAGE="❌ Azure DevOps Pipeline Failed
+        
+        Project: $(System.TeamProject)
+        Repository: $(Build.Repository.Name)
+        Branch: $(Build.SourceBranchName)
+        Build Number: $(Build.BuildNumber)"
+      fi
+
+      curl -X POST \
+        -H "Content-Type: application/json" \
+        --data "{\"text\":\"$MESSAGE\"}" \
+        "$SLACK_WEBHOOK_URL"
+  env:
+    SLACK_WEBHOOK_URL: $(SLACK_WEBHOOK_URL)
