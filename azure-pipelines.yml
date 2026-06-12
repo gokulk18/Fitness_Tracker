@@ -28,7 +28,7 @@ steps:
     command: buildAndPush
     repository: $(imageRepository)
     dockerfile: '**/Dockerfile'
-    containerRegistry: 'ACR Connection'
+    containerRegistry: 'ACR Conn'
     tags: |
       $(imageTag)
       latest
