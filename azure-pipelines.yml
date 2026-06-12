@@ -13,26 +13,30 @@ variables:
 
 steps:
 
+# Install Node.js
 - task: NodeTool@0
   displayName: 'Install Node.js'
   inputs:
     versionSpec: '20.x'
 
+# Install Dependencies
 - script: |
     npm install
   displayName: 'Install Dependencies'
 
+# Build and Push Docker Image to ACR
 - task: Docker@2
   displayName: 'Build and Push Docker Image'
   inputs:
     command: buildAndPush
     repository: $(imageRepository)
-    dockerfile: '**/Dockerfile'
+    dockerfile: 'Dockerfile'
     containerRegistry: 'ACR service connection'
     tags: |
       $(imageTag)
       latest
 
+# Deploy to AKS
 - task: KubernetesManifest@1
   displayName: 'Deploy to AKS'
   inputs:
@@ -46,3 +50,18 @@ steps:
       k8s/pvc.yml
     containers: |
       fitnessacr.azurecr.io/$(imageRepository):$(imageTag)
+
+# Slack Notification (Runs Always)
+- script: |
+    if [ "$(Agent.JobStatus)" = "Succeeded" ]; then
+      MESSAGE="✅ Pipeline Succeeded | Project: $(System.TeamProject) | Repo: $(Build.Repository.Name) | Branch: $(Build.SourceBranchName) | Build: $(Build.BuildNumber)"
+    else
+      MESSAGE="❌ Pipeline Failed | Project: $(System.TeamProject) | Repo: $(Build.Repository.Name) | Branch: $(Build.SourceBranchName) | Build: $(Build.BuildNumber)"
+    fi
+
+    curl -X POST \
+      -H "Content-Type: application/json" \
+      --data "{\"text\":\"$MESSAGE\"}" \
+      "$(SLACK_WEBHOOK_URL)"
+  displayName: 'Slack Notification'
+  condition: always()
