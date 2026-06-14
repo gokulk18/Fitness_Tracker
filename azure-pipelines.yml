@@ -31,7 +31,7 @@ steps:
     command: buildAndPush
     repository: $(imageRepository)
     dockerfile: '**/Dockerfile'
-    containerRegistry: 'ACR Conn'
+    containerRegistry: 'ACRConnection'
     tags: |
       $(imageTag)
       latest
@@ -41,7 +41,7 @@ steps:
   displayName: Deploy to AKS
   inputs:
     action: deploy
-    kubernetesServiceConnection: 'Azure AKS'
+    kubernetesServiceConnection: 'AKS'
     namespace: suwetha-ns
     manifests: |
       k8s/app-deployment.yml
