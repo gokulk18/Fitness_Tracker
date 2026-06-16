@@ -3,27 +3,27 @@ trigger:
   branches:
     include:
       - master
-
+ 
 pool:
   vmImage: ubuntu-latest
-
+ 
 variables:
   imageRepository: fitnessapp
   imageTag: $(Build.BuildId)
-
+ 
 steps:
-
+ 
 # ---------------- INSTALL NODE ----------------
 - task: NodeTool@0
   displayName: Install Node.js
   inputs:
     versionSpec: '20.x'
-
+ 
 # ---------------- INSTALL DEPENDENCIES ----------------
 - script: |
     npm install
   displayName: Install Dependencies
-
+ 
 # ---------------- BUILD & PUSH IMAGE ----------------
 - task: Docker@2
   displayName: Build and Push Docker Image
@@ -35,7 +35,7 @@ steps:
     tags: |
       $(imageTag)
       latest
-
+ 
 # ---------------- DEPLOY TO AKS ----------------
 - task: KubernetesManifest@1
   displayName: Deploy to AKS
@@ -46,9 +46,10 @@ steps:
     manifests: |
       k8s/app-deployment.yml
       k8s/configmap.yml
+      k8s/mongodb-deployment.yaml
     containers: |
       fitnessacr.azurecr.io/$(imageRepository):$(imageTag)
-
+ 
 # ---------------- SLACK NOTIFICATION ----------------
 - task: Bash@3
   displayName: Slack Notification
@@ -57,11 +58,11 @@ steps:
     targetType: inline
     script: |
       if [ "$(Agent.JobStatus)" = "Succeeded" ]; then
-        MESSAGE="✅ Pipeline SUCCESS 🚀 | Build: $(Build.BuildNumber)"
+        MESSAGE="✅ Pipeline SUCCESS 🚀 | Project: $(System.TeamProject) | Repo: $(Build.Repository.Name) | Branch: $(Build.SourceBranchName) | Build: $(Build.BuildNumber)"
       else
-        MESSAGE="❌ Pipeline FAILED 🚨 | Build: $(Build.BuildNumber)"
+        MESSAGE="❌ Pipeline FAILED 🚨 | Project: $(System.TeamProject) | Repo: $(Build.Repository.Name) | Branch: $(Build.SourceBranchName) | Build: $(Build.BuildNumber)"
       fi
-
+ 
       curl -X POST \
         -H "Content-Type: application/json" \
         --data "{\"text\":\"$MESSAGE\"}" \
