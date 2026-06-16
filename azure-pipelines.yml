@@ -42,7 +42,7 @@ steps:
   inputs:
     action: deploy
     kubernetesServiceConnection: 'AKS'
-    namespace: suwetha-ns
+    namespace: default
     manifests: |
       k8s/app-deployment.yml
       k8s/configmap.yml
