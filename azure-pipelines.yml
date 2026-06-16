@@ -31,7 +31,7 @@ steps:
     command: buildAndPush
     repository: $(imageRepository)
     dockerfile: '**/Dockerfile'
-    containerRegistry: 'ACR'
+    containerRegistry: 'ACR1'
     tags: |
       $(imageTag)
       latest
