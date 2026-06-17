@@ -48,7 +48,7 @@ steps:
       k8s/configmap.yml
       k8s/mongodb-deployment.yaml
     containers: |
-      fitnessacr.azurecr.io/$(imageRepository):$(imageTag)
+      fitnessapp.azurecr.io/$(imageRepository):$(imageTag)
  
 # ---------------- SLACK NOTIFICATION ----------------
 - task: Bash@3
